@@ -1,6 +1,10 @@
 'use strict';
 
-import {app, protocol, BrowserWindow} from 'electron'
+import {
+    app,
+    protocol,
+    BrowserWindow
+} from 'electron'
 import {
     createProtocol,
     installVueDevtools
@@ -13,7 +17,13 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 let win;
 
 // Scheme must be registered before the app is ready
-protocol.registerSchemesAsPrivileged([{scheme: 'app', privileges: {secure: true, standard: true}}]);
+protocol.registerSchemesAsPrivileged([{
+    scheme: 'app',
+    privileges: {
+        secure: true,
+        standard: true
+    }
+}]);
 
 function createWindow() {
     // Create the browser window.
@@ -95,23 +105,32 @@ if (isDevelopment) {
     }
 }
 
-const Tools = {};
-
-// Method objects
-const Methods = {
-    // App exit
-    exit({event}) {
-        app.exit();
-    }
-};
-
 // Process communication, ipcMain: Main process
-const {ipcMain} = require('electron');
+const {
+    ipcMain
+} = require('electron');
+
+import Methods from './ipcMain';
+
 // Monitoring async-message events.
-ipcMain.on('async-msg', (event, {func = '', params = {}}) => {
+ipcMain.on('async-msg', (event, {
+    moduleName = '',
+    method = '',
+    params
+}) => {
+    let result;
+    console.log(moduleName, method, params);
     try {
-        Methods[func]({event, params});
+        result = {
+            success: true,
+            data: Methods[moduleName][method](params)
+        };
     } catch (err) {
-        event.reply(`${func}-err`, '运行错误！原因：' + err.message);
+        result = {
+            success: false,
+            error: `Module: ${moduleName}, Method: ${method} error! Message: ${err.message}`
+        };
     }
+    console.log(Methods[moduleName][method], result);
+    event.reply(`${moduleName}-${method}`, result);
 });
