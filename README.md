@@ -1,23 +1,33 @@
 # electron-vue-project
 
-## Project setup
+## 项目介绍
+```
+用于快速创建基于VueCli3的Electron桌面程序。
+```
+
+### 项目依赖安装
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### 运行开发环境
 ```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
+npm run e:d
 ```
 
-### Lints and fixes files
+### 运行打包
 ```
-npm run lint
+npm run e:b
+```
+
+### 安装软件
+```
+npm run postinstall
+```
+
+### 卸载软件
+```
+npm run postuninstall
 ```
 
 ### Customize configuration
