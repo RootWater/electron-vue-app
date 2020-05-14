@@ -7,7 +7,7 @@
 
 <script>
 import IpcRenderer from "@/libs/ipcRenderer";
-const ipc = new IpcRenderer("langHelper");
+const ipc = new IpcRenderer("home");
 
 export default {
     name: "home",
