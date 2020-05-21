@@ -4,15 +4,15 @@
  * @params: obj
  */
 export const isEmptyObject = function (obj) {
-    for (let k in obj) {
+    for (const k in obj) {
         return false;
     }
     return true;
 };
 
 /*
-* 判断数据类型
-* */
+ * 判断数据类型
+ * */
 export const checkTools = {
     _typeOf(obj) {
         let toString = Object.prototype.toString;
@@ -86,3 +86,36 @@ export const deepClone = (target) => {
     }
     return obj;
 };
+/**
+ * 防抖函数
+ * @param {*} fn 延迟执行的函数
+ * @param {*} delay 延迟时间
+ */
+export function debounce(fn, delay = 500) {
+    let timer = null;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            fn.call(this, ...args);
+        }, delay);
+    }
+}
+/**
+ * 首字母大写
+ * @param {*} str 字符串
+ */
+export function initialUpper(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+/**
+ * 更新对象属性值
+ */
+export function updateObjVal(obj, keys, values) {
+    if (typeof keys === "string") {
+        obj[keys] = values;
+    } else {
+        for (let index = 0; index < keys.length; index++) {
+            obj[keys[index]] = values[index];
+        }
+    }
+}

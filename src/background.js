@@ -3,12 +3,16 @@
 import {
     app,
     protocol,
-    BrowserWindow
+    BrowserWindow,
+    Tray,
+    Menu,
+    dialog
 } from 'electron'
 import {
     createProtocol,
     installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
+import path from 'path';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -25,17 +29,58 @@ protocol.registerSchemesAsPrivileged([{
     }
 }]);
 
+// 设置系统托盘
+function setAppTray() {
+    // 托盘对象
+    let appTray = null
+    // 系统托盘右键菜单
+    const trayMenuTemplate = [{
+        label: '关于',
+        click: () => {
+            dialog.showMessageBoxSync(win, {
+                title: '关于软件',
+                type: 'info',
+                icon: path.join(__dirname, 'tray_favicon.ico'),
+                message: ''
+            });
+        }
+    }, {
+        label: '退出',
+        click: () => {
+            app.quit();
+            app.quit();
+        }
+    }];
+    // 系统托盘图标目录
+    appTray = new Tray(path.join(__dirname, 'tray_favicon.ico'));
+    // 图标的上下文菜单
+    const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
+    // 设置此托盘图标的悬停提示内容
+    appTray.setToolTip('提示内容');
+    // 设置此图标的上下文菜单
+    appTray.setContextMenu(contextMenu);
+
+    appTray.on('click', function () {
+        win.show();
+    });
+}
+
+
 function createWindow() {
     // Create the browser window.
     win = new BrowserWindow({
-        width: 800,
-        height: 600,
-        frame: true,
+        width: 1200,
+        height: 900,
+        frame: !!isDevelopment,
         resizable: true,
         webPreferences: {
             nodeIntegration: true
         }
     });
+
+    /* setTimeout(() => {
+        setAppTray();
+    }, 100); */
 
     if (process.env.WEBPACK_DEV_SERVER_URL) {
         // Load the url of the dev server if in development mode
@@ -105,32 +150,34 @@ if (isDevelopment) {
     }
 }
 
+import Methods from './ipcMain';
+
 // Process communication, ipcMain: Main process
 const {
     ipcMain
 } = require('electron');
 
-import Methods from './ipcMain';
-
 // Monitoring async-message events.
-ipcMain.on('async-msg', (event, {
+ipcMain.on('async-msg', async (event, {
     moduleName = '',
     method = '',
     params
 }) => {
-    let result;
-    console.log(moduleName, method, params);
+    let result; // 返回结果
     try {
         result = {
             success: true,
-            data: Methods[moduleName][method](params)
+            data: await Methods[moduleName][method](params, win, event)
         };
     } catch (err) {
         result = {
             success: false,
-            error: `Module: ${moduleName}, Method: ${method} error! Message: ${err.message}`
+            error: {
+                module: `Module: ${moduleName}\r`,
+                method: `Method: ${method} error!`,
+                message: `Message: ${err.message}`
+            }
         };
     }
-    console.log(Methods[moduleName][method], result);
-    event.reply(`${moduleName}-${method}`, result);
+    event.reply(`${moduleName}-${method}`, result); // 回复响应
 });

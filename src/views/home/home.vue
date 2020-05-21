@@ -7,16 +7,16 @@
 
 <script>
 import IpcRenderer from "@/libs/ipcRenderer";
+
 const ipc = new IpcRenderer("home");
 
 export default {
     name: "home",
     methods: {
         trySend() {
-            ipc.on('logMsg', (e, params) => {
-                console.log(params);
+            ipc.once("logMsg", null, data => {
+                console.log(data);
             });
-            ipc.send("logMsg", 1);
         }
     },
     created() {
